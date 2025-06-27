@@ -58,3 +58,34 @@ def read_jsonl(file_path, return_type="list", encoding="utf-8", error_handling="
     
     else:
         raise ValueError("无效返回类型: 仅支持 'list' 或 'generator'")
+
+
+def save_to_json(data_list, file_path, indent=4, ensure_ascii=False, custom_serializer=None):
+    """
+    将存储字典的列表保存为JSON文件
+    
+    参数:
+    - data_list: list[dict]  待保存的字典列表
+    - file_path: str         目标文件路径（如"data/output.json"）
+    - indent: int            JSON缩进空格数（默认4，设为 None 可压缩输出）
+    - ensure_ascii: bool     是否转义非 ASCII 字符（默认 False，保留中文等字符）
+    - custom_serializer: func 自定义序列化函数，处理复杂类型（如 datetime）
+    
+    返回: None
+    异常: 可能抛出IOError（文件错误）或TypeError（序列化错误）
+    """
+    # 自动创建目标目录（如果不存在）
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    try:
+        # 使用with语句确保文件安全关闭
+        with open(file_path, 'w', encoding='utf-8') as json_file:
+            json.dump(
+                data_list,
+                json_file,
+                indent=indent,
+                ensure_ascii=ensure_ascii,
+                default=custom_serializer  # 处理不可序列化对象
+            )
+    except (IOError, TypeError) as e:
+        raise RuntimeError(f"保存 JSON 失败: {e}")
